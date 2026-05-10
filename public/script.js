@@ -210,6 +210,11 @@ async function loadFeed(append = false) {
     renderPosts(posts, container);
     hasMoreFeed = posts.length === 10;
     document.getElementById('feed-loader').style.display = 'none';
+    
+    // Обновляем просмотры на сервере
+    posts.forEach(post => {
+      fetch(`${API_URL}/posts/${post.id}/view`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }).catch(() => {});
+    });
   } catch (err) { console.error(err); }
   isLoadingMore = false;
 }

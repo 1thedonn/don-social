@@ -553,6 +553,14 @@ app.post('/api/notifications/read-all', authenticateToken, (req, res) => {
   } catch (error) { res.status(500).json({ error: 'Ошибка' }); }
 });
 
+// ==================== ПРОСМОТРЫ ====================
+app.post('/api/posts/:id/view', authenticateToken, (req, res) => {
+  try {
+    db.prepare('UPDATE posts SET views = views + 1 WHERE id = ?').run(req.params.id);
+    res.json({ success: true });
+  } catch (error) { res.status(500).json({ error: 'Ошибка' }); }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 don запущен на http://localhost:${PORT}`);
 });
