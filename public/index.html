@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="don">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>don — социальная сеть</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="auth-screen" class="auth-container">
+    <div class="auth-card">
+      <h1>💬 don</h1>
+      <p class="auth-subtitle">социальная сеть</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Вход</button>
+        <button class="auth-tab" data-tab="register">Регистрация</button>
+      </div>
+      <form id="login-form" class="auth-form active">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit" class="btn-primary">Войти</button>
+        <p id="login-error" class="error-msg"></p>
+      </form>
+      <form id="register-form" class="auth-form">
+        <input type="text" id="reg-username" placeholder="Имя пользователя" required>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="password" id="reg-password" placeholder="Пароль (мин. 6 символов)" required>
+        <button type="submit" class="btn-primary">Зарегистрироваться</button>
+        <p id="register-error" class="error-msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-container" style="display: none;">
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo" onclick="navigateTo('feed')">💬 don</h1>
+        <div class="search-bar">
+          <input type="text" id="search-input" placeholder="Поиск пользователей...">
+          <div id="search-results" class="search-dropdown"></div>
+        </div>
+        <nav class="nav-links">
+          <a href="#" data-page="feed">Лента</a>
+          <a href="#" data-page="messages">💬</a>
+          <a href="#" data-page="bookmarks">🔖</a>
+          <div class="notifications-wrapper">
+            <button id="notifications-btn" class="btn-icon" title="Уведомления">🔔<span id="notifications-badge" class="badge" style="display:none;">0</span></button>
+            <div id="notifications-dropdown" class="notifications-dropdown"></div>
+          </div>
+          <a href="#" data-page="profile" id="my-profile-link">Профиль</a>
+          <button id="theme-toggle" class="btn-icon" title="Сменить тему">🌓</button>
+          <button id="logout-btn" class="btn-logout">Выйти</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="container">
+        <!-- ЛЕНТА -->
+        <div id="feed-page" class="page active">
+          <div class="create-post-card">
+            <div class="create-post-header">
+              <img id="current-user-avatar" src="/uploads/default-avatar.png" alt="Аватар" class="avatar-small">
+              <span>Что нового?</span>
+            </div>
+            <form id="create-post-form">
+              <textarea id="post-content" placeholder="Напишите что-нибудь... #хештеги работают" rows="3"></textarea>
+              <div class="post-actions">
+                <label class="file-upload-btn">📷 Медиа<input type="file" id="post-image" accept="image/*,video/*" hidden></label>
+                <img id="image-preview" class="image-preview" style="display: none;">
+                <video id="video-preview" class="image-preview" style="display: none;" controls></video>
+                <button type="submit" class="btn-primary">Опубликовать</button>
+              </div>
+            </form>
+          </div>
+          <div id="feed-posts" class="posts-container"></div>
+          <div id="feed-loader" class="loader" style="display:none;">Загрузка...</div>
+        </div>
+
+        <!-- СООБЩЕНИЯ -->
+        <div id="messages-page" class="page">
+          <div class="messages-layout">
+            <div class="chats-list" id="chats-list">
+              <h3>Сообщения</h3>
+              <div id="chats-container"></div>
+            </div>
+            <div class="chat-window" id="chat-window">
+              <div class="chat-placeholder">Выберите чат</div>
+              <div class="chat-messages" id="chat-messages"></div>
+              <form class="chat-input-form" id="chat-input-form" style="display:none;">
+                <input type="text" id="chat-input" placeholder="Сообщение..." required>
+                <button type="submit" class="btn-primary">➤</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- ЗАКЛАДКИ -->
+        <div id="bookmarks-page" class="page">
+          <h2 style="margin-bottom:20px;">🔖 Закладки</h2>
+          <div id="bookmarks-posts" class="posts-container"></div>
+          <div id="bookmarks-loader" class="loader" style="display:none;">Загрузка...</div>
+        </div>
+
+        <!-- ХЕШТЕГ -->
+        <div id="hashtag-page" class="page">
+          <h2 id="hashtag-title" style="margin-bottom:20px;"></h2>
+          <div id="hashtag-posts" class="posts-container"></div>
+          <div id="hashtag-loader" class="loader" style="display:none;">Загрузка...</div>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div id="profile-page" class="page">
+          <div class="profile-header">
+            <div class="avatar-wrapper">
+              <img id="profile-avatar" src="/uploads/default-avatar.png" alt="Аватар" class="avatar-large">
+              <label class="avatar-upload-label" id="avatar-upload-label" style="display: none;" title="Сменить аватар">📷</label>
+            </div>
+            <div class="profile-info">
+              <div class="profile-name-row">
+                <h2 id="profile-display-name"></h2>
+                <span id="profile-username-display" class="profile-username-muted"></span>
+                <span id="profile-private-badge" class="private-badge" style="display:none;">🔒</span>
+              </div>
+              <p id="profile-bio"></p>
+              <div class="profile-stats">
+                <span><strong id="profile-posts-count">0</strong> постов</span>
+                <span style="cursor:pointer;text-decoration:underline;"><strong id="profile-followers-count">0</strong> подписчиков</span>
+                <span style="cursor:pointer;text-decoration:underline;"><strong id="profile-following-count">0</strong> подписок</span>
+              </div>
+              <div class="profile-actions" id="profile-actions"></div>
+            </div>
+          </div>
+          <div id="edit-profile-section" class="edit-profile-card" style="display: none;">
+            <h3>Редактировать профиль</h3>
+            <div class="edit-field">
+              <label>Имя пользователя (@ник)</label>
+              <input type="text" id="edit-username" placeholder="Ваш ник">
+              <button class="btn-sm" onclick="saveUsername()">Сохранить ник</button>
+              <span id="username-error" class="error-msg"></span>
+            </div>
+            <div class="edit-field">
+              <label>Отображаемое имя</label>
+              <input type="text" id="edit-display-name" placeholder="Ваше имя">
+            </div>
+            <div class="edit-field">
+              <label>О себе</label>
+              <textarea id="edit-bio" rows="2" placeholder="Расскажите о себе"></textarea>
+            </div>
+            <div class="edit-field">
+              <label>
+                <input type="checkbox" id="edit-private"> Приватный аккаунт
+              </label>
+            </div>
+            <button class="btn-primary" onclick="saveProfile()">Сохранить</button>
+          </div>
+          <div id="profile-posts" class="posts-container"></div>
+          <div id="profile-private-message" class="private-message" style="display:none;">
+            <p>🔒 Это приватный аккаунт. Подпишитесь, чтобы видеть посты.</p>
+          </div>
+          <div id="profile-loader" class="loader" style="display:none;">Загрузка...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Модалка комментариев -->
+  <div id="comments-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header"><h3>Комментарии</h3><button class="modal-close" onclick="closeComments()">✕</button></div>
+      <div id="comments-list" class="comments-list"></div>
+      <form id="comment-form" class="comment-form">
+        <input type="text" id="comment-input" placeholder="Напишите комментарий..." required>
+        <button type="submit" class="btn-primary">Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Модалка подписок -->
+  <div id="follows-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header"><h3 id="follows-modal-title">Подписчики</h3><button class="modal-close" onclick="closeFollowsModal()">✕</button></div>
+      <div id="follows-list" class="comments-list"></div>
+    </div>
+  </div>
+
+  <!-- Модалка заявок -->
+  <div id="requests-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header"><h3>Заявки на подписку</h3><button class="modal-close" onclick="closeRequestsModal()">✕</button></div>
+      <div id="requests-list" class="comments-list"></div>
+    </div>
+  </div>
+
+  <!-- Модалка редактирования поста -->
+  <div id="edit-post-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header"><h3>Редактировать пост</h3><button class="modal-close" onclick="closeEditPost()">✕</button></div>
+      <textarea id="edit-post-content" rows="4" placeholder="Текст поста"></textarea>
+      <input type="file" id="edit-post-image" accept="image/*,video/*">
+      <img id="edit-image-preview" class="image-preview" style="display: none; max-height: 200px;">
+      <video id="edit-video-preview" class="image-preview" style="display: none; max-height: 200px;" controls></video>
+      <div class="modal-actions">
+        <button class="btn-danger" id="delete-post-btn">Удалить пост</button>
+        <button class="btn-primary" onclick="saveEditPost()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
